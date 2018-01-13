@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>MyChat</title>
+        <script type="text/javascript">
+            var ws;
+            var name;
+            var ip = location.host;
+
+            function init() {
+                ws = new WebSocket("ws://" + ip + "/chat");
+                ws.onopen = function(event) {
+
+                }
+                ws.onmessage = function(event) {
+                        var $textarea = document.getElementById("messages");
+                        $textarea.value = $textarea.value + event.data + "\n";
+                }
+                ws.onclose = function (event) {
+                        var $textarea = document.getElementById("messages");
+                        var date = new Date().toLocaleTimeString();
+                        var messageClose = "(" + date + ") <" + name + " left the chat>";
+                }
+            }
+
+
+
+            function setUserName() {
+                var enterNameField = document.getElementById("entername");
+                if(enterNameField.value.trim() != "") {
+                    var date = new Date().toLocaleTimeString();
+                    var messageName = "(" + date + ") <" + enterNameField.value.trim() + " joined the chat>";
+                    ws.send(messageName);
+                    name = enterNameField.value.trim();
+                    enterNameField.value = "";
+                    enterNameField.disabled = true;
+                    document.getElementById("message").disabled = false;
+
+                }
+            }
+            function sendMessage() {
+                var messageField = document.getElementById("message");
+                if(messageField.value.trim() != "") {
+                    var date = new Date().toLocaleTimeString();
+                    var message = "(" + date + ") " + name + ": " + messageField.value.trim();
+                    ws.send(message);
+                    messageField.value = "";
+                }
+            }
+        </script>
+    </head>
+    <body onload="init();">
+        <div id="body">
+            <form name="enternameform" action="" onsubmit="setUserName(); return false">
+                Enter your name
+                <input name="usernameenter" type="text" id="entername" size="30"/>
+                <input type="button" name="submitmsg" value="Ok" onclick="setUserName()"/>
+            </form>
+
+            <div id="menu">
+
+            </div>
+
+            <div id="chatbox">
+                <textarea id="messages" rows="20" cols="80" readonly="readonly" resize="none"></textarea>
+            </div>
+
+            <form name="message" action="" onsubmit="sendMessage(); return false;">
+                <input name="usermsg" type="text" id="message" size="40" disabled="true"/>
+                <input type="button" name="submitmsg" value="Send..." onclick="sendMessage()">
+            </form>
+        </div>
+    </body>
+</html>
